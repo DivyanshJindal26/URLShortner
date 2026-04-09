@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "softkernel",
+    "slug": "softkernel",
+    "version": "1.0.0",
+    "scheme": "softkernel",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f0f0f"
+      },
+      "package": "in.softkernel.app"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "ShortenerWidget",
+              "label": "SK Shortener",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "description": "Quick URL shorten & image upload",
+              "previewImage": "./assets/widget-preview.png",
+              "filename": "./widgets/ShortenerWidget"
+            }
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

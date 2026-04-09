@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>softkernel.in — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h1>softkernel.in</h1>
+      <p>Enter your API key to continue</p>
+      <input id="key-input" type="password" placeholder="API Key" autocomplete="off" />
+      <button onclick="login()">Login</button>
+      <p id="login-error" class="error hidden">Wrong key</p>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app" class="hidden">
+    <header>
+      <div class="header-inner">
+        <h1>softkernel.in</h1>
+        <div class="stats" id="stats-bar"></div>
+        <button class="btn-ghost" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('links', this)">Links</button>
+        <button class="tab" onclick="switchTab('images', this)">Images</button>
+      </div>
+
+      <!-- Links Panel -->
+      <div id="panel-links" class="panel">
+        <div class="form-row">
+          <input id="url-input" type="url" placeholder="https://example.com/long-url" />
+          <input id="code-input" type="text" placeholder="custom-code (optional)" />
+          <button onclick="shortenUrl()">Shorten</button>
+        </div>
+        <div id="links-list" class="list"></div>
+      </div>
+
+      <!-- Images Panel -->
+      <div id="panel-images" class="panel hidden">
+        <div class="upload-zone" id="upload-zone">
+          <p>Drag & drop images here, or <label class="link" for="file-input">browse</label></p>
+          <input id="file-input" type="file" accept="image/*" multiple hidden onchange="uploadFiles(this.files)" />
+          <div id="upload-progress" class="hidden"></div>
+        </div>
+        <div id="images-list" class="list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
