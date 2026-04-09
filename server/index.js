@@ -94,7 +94,7 @@ connectDB()
     function shutdown(signal) {
       logger.info(`${signal} received — shutting down gracefully`);
       server.close(() => {
-        require('./db').mongoose.connection.close(false, () => {
+        require('./db').mongoose.connection.close().then(() => {
           logger.info('MongoDB connection closed');
           process.exit(0);
         });

@@ -35,6 +35,13 @@
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "be7a981b-e7c4-425b-9f74-628372f0f4f5"
+      }
+    },
+    "owner": "softkernel"
   }
 }
