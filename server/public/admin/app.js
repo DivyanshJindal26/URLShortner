@@ -18,14 +18,17 @@ function api(method, path, body, isForm) {
 // --- Auth ---
 
 async function login() {
-  const key = document.getElementById('key-input').value.trim();
-  if (!key) return;
-  API_KEY = key;
-  const res = await fetch(`${BASE}/api/stats`, {
-    headers: { Authorization: `Bearer ${key}` },
+  const password = document.getElementById('key-input').value.trim();
+  if (!password) return;
+  const res = await fetch(`${BASE}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
   });
   if (res.ok) {
-    localStorage.setItem('sk_api_key', key);
+    const { apiKey } = await res.json();
+    API_KEY = apiKey;
+    localStorage.setItem('sk_api_key', apiKey);
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
     init();

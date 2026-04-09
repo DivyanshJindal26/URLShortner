@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 // Validate required env vars at startup
-const REQUIRED_ENV = ['API_KEY', 'BASE_URL', 'MONGODB_URI'];
+const REQUIRED_ENV = ['API_KEY', 'ADMIN_PASSWORD', 'BASE_URL', 'MONGODB_URI'];
 for (const key of REQUIRED_ENV) {
   if (!process.env[key]) {
     console.error(`Missing required env var: ${key}`);
@@ -14,6 +14,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const logger = require('./logger');
 const path = require('path');
 const { connectDB } = require('./db');
 const auth = require('./middleware/auth');
@@ -23,7 +24,7 @@ const app = express();
 // --- Security & Logging ---
 app.use(helmet({ contentSecurityPolicy: false })); // CSP off — we serve inline HTML for OG pages
 app.use(cors());
-app.use(morgan('combined'));
+app.use(morgan('combined', { stream: logger.morganStream }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
@@ -54,6 +55,17 @@ app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 
 // --- API Routes ---
+// Login is public (no API key needed) — dashboard uses ADMIN_PASSWORD, gets API key back
+app.post('/api/admin/login', apiLimiter, (req, res) => {
+  const { password } = req.body;
+  if (!password || password !== process.env.ADMIN_PASSWORD) {
+    logger.warn('Failed admin login attempt', { ip: req.ip });
+    return res.status(401).json({ error: 'Wrong password' });
+  }
+  logger.info('Admin dashboard login', { ip: req.ip });
+  res.json({ apiKey: process.env.API_KEY });
+});
+
 app.use('/api/shorten', apiLimiter, auth, require('./routes/shorten'));
 app.use('/api/upload',  uploadLimiter, auth, require('./routes/upload'));
 app.use('/api',         apiLimiter, auth, require('./routes/admin'));
@@ -66,7 +78,8 @@ app.use('/', require('./routes/redirect'));
 app.use((err, req, res, next) => {
   const status = err.status || err.statusCode || 500;
   const message = status < 500 ? err.message : 'Internal server error';
-  if (status >= 500) console.error('Unhandled error:', err);
+  if (status >= 500) logger.error('Unhandled error', { err: err.message, stack: err.stack, path: req.path });
+  else logger.warn('Client error', { status, message, path: req.path });
   res.status(status).json({ error: message });
 });
 
@@ -76,16 +89,16 @@ const PORT = process.env.PORT || 3000;
 connectDB()
   .then(() => {
     const server = app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Base URL: ${process.env.BASE_URL}`);
+      logger.info(`Server running on port ${PORT}`);
+      logger.info(`Base URL: ${process.env.BASE_URL}`);
     });
 
     // Graceful shutdown
     function shutdown(signal) {
-      console.log(`${signal} received — shutting down gracefully`);
+      logger.info(`${signal} received — shutting down gracefully`);
       server.close(() => {
         require('./db').mongoose.connection.close(false, () => {
-          console.log('MongoDB connection closed');
+          logger.info('MongoDB connection closed');
           process.exit(0);
         });
       });
@@ -97,6 +110,6 @@ connectDB()
     process.on('SIGINT',  () => shutdown('SIGINT'));
   })
   .catch((err) => {
-    console.error('Failed to connect to MongoDB:', err.message);
+    logger.error('Failed to connect to MongoDB', { message: err.message });
     process.exit(1);
   });

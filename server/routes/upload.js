@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const { customAlphabet } = require('nanoid');
 const Image = require('../models/Image');
+const logger = require('../logger');
 
 const router = express.Router();
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 8);
@@ -40,6 +41,7 @@ router.post('/', upload.single('image'), async (req, res, next) => {
       mimeType: mimetype,
     });
 
+    logger.info('Image uploaded', { filename, originalName: originalname, size, mimeType: mimetype });
     const base = process.env.BASE_URL;
     res.status(201).json({
       filename,

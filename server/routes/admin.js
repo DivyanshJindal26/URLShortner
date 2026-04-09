@@ -3,8 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const Link = require('../models/Link');
 const Image = require('../models/Image');
+const logger = require('../logger');
 
 const router = express.Router();
+
 const UPLOADS = path.join(__dirname, '../uploads');
 
 // --- Links ---
@@ -20,6 +22,7 @@ router.delete('/links/:code', async (req, res, next) => {
   try {
     const result = await Link.findOneAndDelete({ code: req.params.code });
     if (!result) return res.status(404).json({ error: 'Not found' });
+    logger.info('Link deleted', { code: req.params.code });
     res.json({ ok: true });
   } catch (err) { next(err); }
 });
@@ -46,6 +49,7 @@ router.delete('/images/:filename', async (req, res, next) => {
     const filePath = path.join(UPLOADS, filename);
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
+    logger.info('Image deleted', { filename });
     res.json({ ok: true });
   } catch (err) { next(err); }
 });

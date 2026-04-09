@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const Image = require('../models/Image');
+const logger = require('../logger');
 
 const router = express.Router();
 const UPLOADS = path.join(__dirname, '../uploads');
@@ -21,7 +22,11 @@ router.get('/:filename', async (req, res, next) => {
       { $inc: { visits: 1 } },
       { new: false }
     );
-    if (!image) return res.status(404).send('Image not found');
+    if (!image) {
+      logger.warn('Image embed not found', { filename });
+      return res.status(404).send('Image not found');
+    }
+    logger.info('Image embed served', { filename, visits: image.visits + 1 });
 
     const base = process.env.BASE_URL;
     const rawUrl   = `${base}/i/${filename}/raw`;
@@ -58,10 +63,17 @@ router.get('/:filename/raw', async (req, res, next) => {
     if (!safe(filename)) return res.status(400).send('Invalid filename');
 
     const image = await Image.findOne({ filename });
-    if (!image) return res.status(404).send('Image not found');
+    if (!image) {
+      logger.warn('Raw image not found in DB', { filename });
+      return res.status(404).send('Image not found');
+    }
 
     const filePath = path.join(UPLOADS, filename);
-    if (!fs.existsSync(filePath)) return res.status(404).send('File missing on disk');
+    if (!fs.existsSync(filePath)) {
+      logger.error('Image missing on disk', { filename, filePath });
+      return res.status(404).send('File missing on disk');
+    }
+    logger.debug('Raw image served', { filename });
 
     res.setHeader('Content-Type', image.mimeType);
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');

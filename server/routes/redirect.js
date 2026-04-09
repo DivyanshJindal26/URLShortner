@@ -1,5 +1,6 @@
 const express = require('express');
 const Link = require('../models/Link');
+const logger = require('../logger');
 
 const router = express.Router();
 const RESERVED = new Set(['api', 'i', 'admin', 'health', 'favicon.ico']);
@@ -14,7 +15,11 @@ router.get('/:code', async (req, res, next) => {
       { $inc: { visits: 1 } },
       { new: false }
     );
-    if (!link) return res.status(404).send('Short link not found');
+    if (!link) {
+      logger.warn('Short link not found', { code });
+      return res.status(404).send('Short link not found');
+    }
+    logger.info('Redirect', { code, originalUrl: link.originalUrl, visits: link.visits + 1 });
 
     const base = process.env.BASE_URL;
 

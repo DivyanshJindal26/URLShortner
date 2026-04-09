@@ -2,6 +2,7 @@ const express = require('express');
 const { customAlphabet } = require('nanoid');
 const fetch = require('node-fetch');
 const Link = require('../models/Link');
+const logger = require('../logger');
 
 const router = express.Router();
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
@@ -9,6 +10,7 @@ const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 const RESERVED = new Set(['api', 'i', 'admin', 'health', 'favicon.ico']);
 
 async function fetchOGData(url) {
+  logger.debug('Fetching OG data', { url });
   try {
     const res = await fetch(url, {
       timeout: 5000,
@@ -29,7 +31,8 @@ async function fetchOGData(url) {
       description: getMeta('og:description'),
       image: getMeta('og:image'),
     };
-  } catch {
+  } catch (e) {
+    logger.warn('Failed to fetch OG data', { url, error: e.message });
     return { title: null, description: null, image: null };
   }
 }
@@ -65,6 +68,7 @@ router.post('/', async (req, res, next) => {
       ogImage: og.image,
     });
 
+    logger.info('Short link created', { code: link.code, originalUrl: url, title: og.title });
     res.status(201).json({
       code: link.code,
       shortUrl: `${process.env.BASE_URL}/${link.code}`,
