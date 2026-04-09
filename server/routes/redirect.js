@@ -3,7 +3,7 @@ const Link = require('../models/Link');
 const logger = require('../logger');
 
 const router = express.Router();
-const RESERVED = new Set(['api', 'i', 'admin', 'health', 'favicon.ico']);
+const RESERVED = new Set(['api', 'i', 'admin', 'favicon.ico']);
 
 router.get('/:code', async (req, res, next) => {
   try {

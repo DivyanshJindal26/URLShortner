@@ -48,9 +48,6 @@ const uploadLimiter = rateLimit({
   message: { error: 'Upload limit reached, try again later' },
 });
 
-// --- Health Check (no auth, for Docker/nginx) ---
-app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
-
 // --- Static Admin Dashboard ---
 app.use('/admin', express.static(path.join(__dirname, 'public/admin')));
 

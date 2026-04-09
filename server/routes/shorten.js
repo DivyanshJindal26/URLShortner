@@ -7,7 +7,7 @@ const logger = require('../logger');
 const router = express.Router();
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 7);
 
-const RESERVED = new Set(['api', 'i', 'admin', 'health', 'favicon.ico']);
+const RESERVED = new Set(['api', 'i', 'admin', 'favicon.ico']);
 
 async function fetchOGData(url) {
   logger.debug('Fetching OG data', { url });
