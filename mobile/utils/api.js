@@ -4,14 +4,17 @@ import axios from 'axios';
 const STORAGE_URL_KEY = 'sk_server_url';
 const STORAGE_KEY_KEY = 'sk_api_key';
 
+const DEFAULT_SERVER_URL = process.env.EXPO_PUBLIC_SERVER_URL || 'https://softkernel.in';
+const DEFAULT_API_KEY    = process.env.EXPO_PUBLIC_API_KEY    || '';
+
 export async function getConfig() {
   const [serverUrl, apiKey] = await Promise.all([
     AsyncStorage.getItem(STORAGE_URL_KEY),
     AsyncStorage.getItem(STORAGE_KEY_KEY),
   ]);
   return {
-    serverUrl: serverUrl || 'https://softkernel.in',
-    apiKey: apiKey || '',
+    serverUrl: serverUrl || DEFAULT_SERVER_URL,
+    apiKey:    apiKey    || DEFAULT_API_KEY,
   };
 }
 
@@ -51,8 +54,7 @@ export async function uploadImage(uri, filename, mimeType) {
 
 export async function getLinks() {
   const c = await client();
-  const res = await c.get('/links');
-  return res.data;
+  return (await c.get('/links')).data;
 }
 
 export async function deleteLink(code) {
@@ -62,8 +64,7 @@ export async function deleteLink(code) {
 
 export async function getImages() {
   const c = await client();
-  const res = await c.get('/images');
-  return res.data;
+  return (await c.get('/images')).data;
 }
 
 export async function deleteImage(filename) {

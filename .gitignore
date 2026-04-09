@@ -5,3 +5,4 @@ server/uploads/
 mobile/.expo/
 mobile/android/
 mobile/ios/
+mobile/.env
